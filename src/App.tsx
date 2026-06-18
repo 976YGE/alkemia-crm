@@ -23,6 +23,7 @@ import FileHistory from './pages/admin/FileHistory';
 import { CategoriesManagement } from './pages/admin/CategoriesManagement';
 import { ProductsManagement } from './pages/admin/ProductsManagement';
 import { BulkMarkReported } from './pages/admin/BulkMarkReported';
+import { CountrySettings } from './pages/admin/CountrySettings';
 import { ClientsList } from './pages/clients/ClientsList';
 import { CustomerDetail } from './pages/clients/CustomerDetail';
 import { CustomerForm } from './pages/clients/CustomerForm';
@@ -67,6 +68,7 @@ function AppRoutes() {
         <Route path="/admin/categories" element={<ProtectedRoute><CategoriesManagement /></ProtectedRoute>} />
         <Route path="/admin/products" element={<ProtectedRoute><ProductsManagement /></ProtectedRoute>} />
         <Route path="/admin/bulk-mark-reported" element={<ProtectedRoute><BulkMarkReported /></ProtectedRoute>} />
+        <Route path="/admin/country-settings" element={<ProtectedRoute><CountrySettings /></ProtectedRoute>} />
         <Route path="/notifications" element={<ProtectedRoute><NotificationSettings /></ProtectedRoute>} />
         <Route path="/documents" element={<ProtectedRoute><MyDocuments /></ProtectedRoute>} />
         <Route path="/hr/registrations" element={<ProtectedRoute><FreelanceRegistrations /></ProtectedRoute>} />

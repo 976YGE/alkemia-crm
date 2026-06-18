@@ -161,7 +161,7 @@ export function SalesReportForm() {
       return;
     }
 
-    if (!proofFile && !existingProofFilePath) {
+    if (user?.proof_photo_required && !proofFile && !existingProofFilePath) {
       setError(t('sales.proofFileRequired'));
       return;
     }
@@ -466,7 +466,7 @@ export function SalesReportForm() {
         <Card>
           <CardHeader>
             <CardTitle>
-              {t('sales.proofFile')} <span className="text-red-500">*</span>
+              {t('sales.proofFile')} {user?.proof_photo_required && <span className="text-red-500">*</span>}
             </CardTitle>
           </CardHeader>
           <CardContent>

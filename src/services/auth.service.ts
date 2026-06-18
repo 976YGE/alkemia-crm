@@ -172,7 +172,8 @@ export class AuthService {
       .from('users')
       .select(`
         *,
-        user_code:user_codes(*)
+        user_code:user_codes(*),
+        country:countries!users_country_code_fkey(proof_photo_required)
       `)
       .eq('id', authUser.id)
       .maybeSingle();
@@ -191,7 +192,8 @@ export class AuthService {
       preferred_language: userData.preferred_language,
       role: userData.role,
       first_name: firstName,
-      last_name: lastName
+      last_name: lastName,
+      proof_photo_required: userData.country?.proof_photo_required ?? true
     };
   }
 

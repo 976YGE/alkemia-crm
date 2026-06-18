@@ -11,6 +11,7 @@ export interface AuthUser {
   role: string;
   first_name: string;
   last_name: string;
+  proof_photo_required: boolean;
 }
 
 export interface LanguageOption {

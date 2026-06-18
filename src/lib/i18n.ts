@@ -67,7 +67,8 @@ const resources = {
         administration: 'Administration',
         categoriesManagement: 'Gestion des gammes',
         productsManagement: 'Gestion des produits',
-        bulkMarkReported: 'Init. comptes rendus'
+        bulkMarkReported: 'Init. comptes rendus',
+        countrySettings: 'Paramètres pays'
       },
       agenda: {
         title: 'Mes rendez-vous',
@@ -130,6 +131,15 @@ const resources = {
         changeProofFile: 'Changer le fichier',
         existingProofFile: 'Fichier existant',
         proofFileHint: 'Formats acceptés : JPG, PNG, PDF (max 10 Mo)'
+      },
+      countrySettings: {
+        title: 'Paramètres pays',
+        save: 'Enregistrer',
+        saved: 'Paramètres enregistrés',
+        proofPhotoSection: 'Photo justificative',
+        proofPhotoDescription: 'Définir si la photo justificative est obligatoire dans les comptes rendus d\'animation pour chaque pays.',
+        required: 'Obligatoire',
+        optional: 'Optionnel'
       },
       privacy: {
         title: 'Politique de Confidentialité',
@@ -285,7 +295,8 @@ const resources = {
         administration: 'Administration',
         categoriesManagement: 'Categories',
         productsManagement: 'Products',
-        bulkMarkReported: 'Init. reports'
+        bulkMarkReported: 'Init. reports',
+        countrySettings: 'Country settings'
       },
       agenda: {
         title: 'My appointments',
@@ -348,6 +359,15 @@ const resources = {
         changeProofFile: 'Change file',
         existingProofFile: 'Existing file',
         proofFileHint: 'Accepted formats: JPG, PNG, PDF (max 10 MB)'
+      },
+      countrySettings: {
+        title: 'Country settings',
+        save: 'Save',
+        saved: 'Settings saved',
+        proofPhotoSection: 'Proof photo',
+        proofPhotoDescription: 'Define whether the proof photo is mandatory in sales reports for each country.',
+        required: 'Required',
+        optional: 'Optional'
       },
       privacy: {
         title: 'Privacy Policy',
@@ -503,7 +523,8 @@ const resources = {
         administration: 'Verwaltung',
         categoriesManagement: 'Sortimentsverwaltung',
         productsManagement: 'Produktverwaltung',
-        bulkMarkReported: 'Init. Berichte'
+        bulkMarkReported: 'Init. Berichte',
+        countrySettings: 'Ländereinstellungen'
       },
       agenda: {
         title: 'Meine Termine',
@@ -566,6 +587,15 @@ const resources = {
         changeProofFile: 'Datei ändern',
         existingProofFile: 'Vorhandene Datei',
         proofFileHint: 'Akzeptierte Formate: JPG, PNG, PDF (max. 10 MB)'
+      },
+      countrySettings: {
+        title: 'Ländereinstellungen',
+        save: 'Speichern',
+        saved: 'Einstellungen gespeichert',
+        proofPhotoSection: 'Nachweisfoto',
+        proofPhotoDescription: 'Festlegen, ob das Nachweisfoto in Verkaufsberichten für jedes Land obligatorisch ist.',
+        required: 'Pflicht',
+        optional: 'Optional'
       },
       privacy: {
         title: 'Datenschutzrichtlinie',
@@ -721,7 +751,8 @@ const resources = {
         administration: 'Administración',
         categoriesManagement: 'Gestión de gamas',
         productsManagement: 'Gestión de productos',
-        bulkMarkReported: 'Init. informes'
+        bulkMarkReported: 'Init. informes',
+        countrySettings: 'Configuracion paises'
       },
       agenda: {
         title: 'Mis citas',
@@ -784,6 +815,15 @@ const resources = {
         changeProofFile: 'Cambiar el archivo',
         existingProofFile: 'Archivo existente',
         proofFileHint: 'Formatos aceptados: JPG, PNG, PDF (máx 10 MB)'
+      },
+      countrySettings: {
+        title: 'Configuracion de paises',
+        save: 'Guardar',
+        saved: 'Configuracion guardada',
+        proofPhotoSection: 'Foto justificativa',
+        proofPhotoDescription: 'Definir si la foto justificativa es obligatoria en los informes de ventas para cada pais.',
+        required: 'Obligatorio',
+        optional: 'Opcional'
       },
       privacy: {
         title: 'Política de Privacidad',
@@ -939,7 +979,8 @@ const resources = {
         administration: 'Amministrazione',
         categoriesManagement: 'Gestione gamme',
         productsManagement: 'Gestione prodotti',
-        bulkMarkReported: 'Init. report'
+        bulkMarkReported: 'Init. report',
+        countrySettings: 'Impostazioni paesi'
       },
       agenda: {
         title: 'I miei appuntamenti',
@@ -1002,6 +1043,15 @@ const resources = {
         changeProofFile: 'Cambia il file',
         existingProofFile: 'File esistente',
         proofFileHint: 'Formati accettati: JPG, PNG, PDF (max 10 MB)'
+      },
+      countrySettings: {
+        title: 'Impostazioni paesi',
+        save: 'Salva',
+        saved: 'Impostazioni salvate',
+        proofPhotoSection: 'Foto giustificativa',
+        proofPhotoDescription: 'Definire se la foto giustificativa e obbligatoria nei report di vendita per ogni paese.',
+        required: 'Obbligatorio',
+        optional: 'Facoltativo'
       },
       privacy: {
         title: 'Informativa sulla Privacy',

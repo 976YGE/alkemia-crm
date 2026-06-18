@@ -1,7 +1,7 @@
 import { ReactNode, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Calendar, Users, ShoppingCart, BarChart3, LogOut, Server, FileText, Home, HardDrive, Archive, Bell, Package, Layers, Droplets, CalendarOff, Activity, UserPlus, RefreshCw, FolderOpen, KeyRound, Check, X } from 'lucide-react';
+import { Calendar, Users, ShoppingCart, BarChart3, LogOut, Server, FileText, Home, HardDrive, Archive, Bell, Package, Layers, Droplets, CalendarOff, Activity, UserPlus, RefreshCw, FolderOpen, KeyRound, Check, X, Globe } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { LanguageSwitcher } from '../ui/LanguageSwitcher';
 import { supabase } from '../../lib/supabase';
@@ -167,6 +167,12 @@ export function MainLayout({ children }: MainLayoutProps) {
           path: '/admin/notifications',
           label: t('notifications.adminNavLabel'),
           icon: <Bell className="w-5 h-5" />,
+          disabled: false
+        },
+        {
+          path: '/admin/country-settings',
+          label: t('nav.countrySettings'),
+          icon: <Globe className="w-5 h-5" />,
           disabled: false
         },
       ]

@@ -19,6 +19,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     AuthService.getCurrentUser()
       .then(setUser)
+      .catch(() => setUser(null))
       .finally(() => setLoading(false));
 
     const { data: { subscription } } = AuthService.onAuthStateChange((user) => {

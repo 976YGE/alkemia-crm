@@ -200,7 +200,7 @@ export class AuthService {
   static onAuthStateChange(callback: (user: AuthUser | null) => void) {
     return supabase.auth.onAuthStateChange((_event, session) => {
       if (session?.user) {
-        this.getCurrentUser().then(callback);
+        this.getCurrentUser().then(callback).catch(() => callback(null));
       } else {
         callback(null);
       }

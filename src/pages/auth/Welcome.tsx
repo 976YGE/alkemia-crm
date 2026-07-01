@@ -6,6 +6,7 @@ import { Input } from '../../components/ui/Input';
 import { Card } from '../../components/ui/Card';
 import { Toast } from '../../components/ui/Toast';
 import { supabase } from '../../lib/supabase';
+import { AuthService } from '../../services/auth.service';
 
 export function Welcome() {
   const navigate = useNavigate();
@@ -74,6 +75,11 @@ export function Welcome() {
     try {
       const { error: updateErr } = await supabase.auth.updateUser({ password });
       if (updateErr) throw updateErr;
+
+      const { data: { user: currentUser } } = await supabase.auth.getUser();
+      if (currentUser) {
+        await AuthService.logConnection(currentUser.id, 'login');
+      }
 
       setSuccess(true);
       setTimeout(() => navigate('/'), 1500);

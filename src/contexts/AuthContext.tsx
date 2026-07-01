@@ -18,13 +18,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     AuthService.getCurrentUser()
-      .then(setUser)
+      .then((u) => {
+        setUser(u);
+        if (u) AuthService.logSessionIfNeeded(u.id);
+      })
       .catch(() => setUser(null))
       .finally(() => setLoading(false));
 
-    const { data: { subscription } } = AuthService.onAuthStateChange((user) => {
-      setUser(user);
+    const { data: { subscription } } = AuthService.onAuthStateChange((u) => {
+      setUser(u);
       setLoading(false);
+      if (u) AuthService.logSessionIfNeeded(u.id);
     });
 
     return () => subscription.unsubscribe();

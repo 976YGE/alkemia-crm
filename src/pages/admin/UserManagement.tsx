@@ -70,7 +70,10 @@ export function UserManagement() {
 
       let authMap = new Map();
       if (userIds.length > 0) {
-        const { data: authData } = await supabase.rpc('get_auth_users_info', { user_ids: userIds });
+        const { data: authData, error: authInfoError } = await supabase.rpc('get_auth_users_info', { user_ids: userIds });
+        if (authInfoError) {
+          console.error('Error fetching auth info:', authInfoError);
+        }
         authMap = new Map(authData?.map((a: any) => [a.id, a]) || []);
       }
 

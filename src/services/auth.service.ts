@@ -3,7 +3,9 @@ import i18n from '../lib/i18n';
 import type { AuthUser, UserCode } from '../types';
 
 export class AuthService {
-  private static async logConnection(
+  private static sessionLoggedKey = 'last_connection_logged';
+
+  static async logConnection(
     userId: string,
     action: 'login' | 'logout' | 'failed_login'
   ): Promise<void> {
@@ -17,6 +19,13 @@ export class AuthService {
     } catch (error) {
       console.error('Error logging connection:', error);
     }
+  }
+
+  static async logSessionIfNeeded(userId: string): Promise<void> {
+    const lastLogged = sessionStorage.getItem(this.sessionLoggedKey);
+    if (lastLogged === userId) return;
+    sessionStorage.setItem(this.sessionLoggedKey, userId);
+    await this.logConnection(userId, 'login');
   }
   static async getAvailableCountries(): Promise<Array<{ code: string; name: string }>> {
     const { data, error } = await supabase

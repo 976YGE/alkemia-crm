@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { ArrowLeft, Save, Check, Search, Plus, Minus, Upload, FileText, X, Ban } from 'lucide-react';
+import { ArrowLeft, Save, Check, Search, Plus, Minus, Upload, FileText, X, Ban, Cloud, CloudOff, Loader2 } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { fr, es, it } from 'date-fns/locale';
 import { MainLayout } from '../../components/layout/MainLayout';
@@ -18,6 +18,10 @@ import { NotificationsService } from '../../services/notifications.service';
 import type { AppointmentWithReport, ProductWithQuantity } from '../../types';
 
 const locales = { fr, es, it };
+
+type AutoSaveStatus = 'idle' | 'saving' | 'saved' | 'error';
+
+const AUTO_SAVE_DELAY = 2000;
 
 export function SalesReportForm() {
   const { appointmentId } = useParams<{ appointmentId: string }>();
@@ -42,6 +46,11 @@ export function SalesReportForm() {
   const [proofFile, setProofFile] = useState<File | null>(null);
   const [existingProofFilePath, setExistingProofFilePath] = useState<string | null>(null);
   const [isNoSale, setIsNoSale] = useState(false);
+  const [autoSaveStatus, setAutoSaveStatus] = useState<AutoSaveStatus>('idle');
+
+  const autoSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const autoSaveInFlightRef = useRef(false);
+  const dataLoadedRef = useRef(false);
 
   useEffect(() => {
     loadData();
@@ -58,6 +67,102 @@ export function SalesReportForm() {
   }, [productQuantities, categories]);
 
   const totalQuantity = Object.values(productQuantities).reduce((sum, q) => sum + q, 0);
+
+  const hasAutoSaveableData = useCallback(() => {
+    if (isNoSale) return comment.trim().length > 0;
+    return Object.keys(productQuantities).length > 0;
+  }, [isNoSale, comment, productQuantities]);
+
+  const performAutoSave = useCallback(async () => {
+    if (!appointmentId || !user || autoSaveInFlightRef.current || !dataLoadedRef.current) return;
+    if (!hasAutoSaveableData()) return;
+
+    autoSaveInFlightRef.current = true;
+    setAutoSaveStatus('saving');
+
+    try {
+      const totalAmountNum = isNoSale ? 0 : (parseFloat(totalAmount) || 0);
+
+      const lines = isNoSale
+        ? []
+        : Object.entries(productQuantities)
+            .filter(([_, qty]) => qty > 0)
+            .map(([productId, quantity]) => {
+              const product = categories
+                .flatMap(c => c.products)
+                .find(p => p.id === productId);
+              return {
+                product_id: productId,
+                quantity,
+                unit_price: product?.price || 0
+              };
+            });
+
+      if (reportId) {
+        await SalesService.updateSalesReport({
+          id: reportId,
+          appointment_id: appointmentId,
+          user_id: user.id,
+          country_code: user.country_code,
+          total_amount: totalAmountNum,
+          comment: comment || undefined,
+          status: 'draft',
+          is_no_sale: isNoSale,
+          proofFile: undefined,
+          existingProofFilePath: isNoSale ? undefined : (existingProofFilePath || undefined),
+          lines
+        });
+      } else {
+        const created = await SalesService.createSalesReport({
+          appointment_id: appointmentId,
+          user_id: user.id,
+          country_code: user.country_code,
+          total_amount: totalAmountNum,
+          comment: comment || undefined,
+          status: 'draft',
+          is_no_sale: isNoSale,
+          proofFile: undefined,
+          lines
+        });
+        if (created?.id) {
+          setReportId(created.id);
+        }
+      }
+
+      setAutoSaveStatus('saved');
+      setTimeout(() => {
+        setAutoSaveStatus(prev => prev === 'saved' ? 'idle' : prev);
+      }, 3000);
+    } catch {
+      setAutoSaveStatus('error');
+      setTimeout(() => {
+        setAutoSaveStatus(prev => prev === 'error' ? 'idle' : prev);
+      }, 5000);
+    } finally {
+      autoSaveInFlightRef.current = false;
+    }
+  }, [appointmentId, user, reportId, isNoSale, totalAmount, comment, productQuantities, categories, existingProofFilePath, hasAutoSaveableData]);
+
+  const scheduleAutoSave = useCallback(() => {
+    if (!dataLoadedRef.current) return;
+    if (autoSaveTimerRef.current) {
+      clearTimeout(autoSaveTimerRef.current);
+    }
+    autoSaveTimerRef.current = setTimeout(() => {
+      performAutoSave();
+    }, AUTO_SAVE_DELAY);
+  }, [performAutoSave]);
+
+  useEffect(() => {
+    if (dataLoadedRef.current) {
+      scheduleAutoSave();
+    }
+    return () => {
+      if (autoSaveTimerRef.current) {
+        clearTimeout(autoSaveTimerRef.current);
+      }
+    };
+  }, [productQuantities, totalAmount, comment, isNoSale]);
 
   const loadData = async () => {
     if (!appointmentId || !user) return;
@@ -112,8 +217,11 @@ export function SalesReportForm() {
 
       setAppointment(apt);
       await loadProducts(apt.country_code);
-
       setExpandedCategories(new Set<string>());
+
+      setTimeout(() => {
+        dataLoadedRef.current = true;
+      }, 100);
     } catch (err) {
       setError(err instanceof Error ? err.message : t('common.error'));
     } finally {
@@ -167,6 +275,10 @@ export function SalesReportForm() {
 
   const handleSave = async (status: 'draft' | 'validated') => {
     setError('');
+
+    if (autoSaveTimerRef.current) {
+      clearTimeout(autoSaveTimerRef.current);
+    }
 
     if (isNoSale) {
       if (!comment.trim()) {
@@ -223,7 +335,7 @@ export function SalesReportForm() {
 
       let savedReportId: string | null = null;
 
-      if (isEditMode && reportId) {
+      if (reportId) {
         await SalesService.updateSalesReport({
           id: reportId,
           appointment_id: appointmentId!,
@@ -305,21 +417,43 @@ export function SalesReportForm() {
   return (
     <MainLayout>
       <div className="space-y-6 max-w-4xl mx-auto pb-8">
-        <div className="flex items-center">
-          <button
-            onClick={() => navigate(`/agenda/${appointmentId}`)}
-            className="mr-4 p-2 hover:bg-slate-100 rounded-lg transition-colors"
-          >
-            <ArrowLeft className="w-5 h-5 text-slate-600" />
-          </button>
-          <div>
-            <h1 className="text-2xl font-bold text-slate-900">
-              {isEditMode ? t('agenda.editReport') : t('sales.title')}
-            </h1>
-            {appointment && (
-              <p className="text-sm text-slate-600 mt-1">
-                {appointment.store_name} - {format(parseISO(appointment.appointment_date), 'd MMMM yyyy', { locale })}
-              </p>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center">
+            <button
+              onClick={() => navigate(`/agenda/${appointmentId}`)}
+              className="mr-4 p-2 hover:bg-slate-100 rounded-lg transition-colors"
+            >
+              <ArrowLeft className="w-5 h-5 text-slate-600" />
+            </button>
+            <div>
+              <h1 className="text-2xl font-bold text-slate-900">
+                {isEditMode ? t('agenda.editReport') : t('sales.title')}
+              </h1>
+              {appointment && (
+                <p className="text-sm text-slate-600 mt-1">
+                  {appointment.store_name} - {format(parseISO(appointment.appointment_date), 'd MMMM yyyy', { locale })}
+                </p>
+              )}
+            </div>
+          </div>
+          <div className="flex items-center gap-1.5 text-sm transition-opacity duration-300" style={{ opacity: autoSaveStatus === 'idle' ? 0 : 1 }}>
+            {autoSaveStatus === 'saving' && (
+              <>
+                <Loader2 className="w-4 h-4 text-slate-400 animate-spin" />
+                <span className="text-slate-400 hidden sm:inline">{t('sales.autoSaving')}</span>
+              </>
+            )}
+            {autoSaveStatus === 'saved' && (
+              <>
+                <Cloud className="w-4 h-4 text-emerald-500" />
+                <span className="text-emerald-600 hidden sm:inline">{t('sales.autoSaved')}</span>
+              </>
+            )}
+            {autoSaveStatus === 'error' && (
+              <>
+                <CloudOff className="w-4 h-4 text-red-400" />
+                <span className="text-red-500 hidden sm:inline">{t('sales.autoSaveError')}</span>
+              </>
             )}
           </div>
         </div>
@@ -357,7 +491,6 @@ export function SalesReportForm() {
         </Card>
 
         {isNoSale ? (
-          /* No-sale mode: just the justification comment */
           <Card>
             <CardHeader>
               <CardTitle>
@@ -375,7 +508,6 @@ export function SalesReportForm() {
             </CardContent>
           </Card>
         ) : (
-          /* Normal sale mode */
           <>
             <Card>
               <CardHeader>
@@ -597,16 +729,6 @@ export function SalesReportForm() {
 
         <div className="bg-white border-t border-slate-200 p-4 -mx-4 sm:mx-0 sm:border-0 sm:p-0 mt-8">
           <div className="flex gap-3">
-            <Button
-              variant="secondary"
-              fullWidth
-              onClick={() => handleSave('draft')}
-              loading={saving}
-              disabled={saving}
-            >
-              <Save className="w-5 h-5 mr-2" />
-              {t('sales.saveDraft')}
-            </Button>
             <Button
               fullWidth
               onClick={() => handleSave('validated')}

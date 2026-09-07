@@ -134,7 +134,10 @@ const resources = {
         noSale: 'Aucune vente',
         noSaleDescription: 'Cochez cette case si aucune vente n\'a été réalisée lors de cette animation.',
         noSaleCommentRequired: 'Un commentaire de justification est obligatoire en cas d\'aucune vente.',
-        noSaleLabel: 'Aucune vente réalisée'
+        noSaleLabel: 'Aucune vente réalisée',
+        autoSaving: 'Sauvegarde...',
+        autoSaved: 'Sauvegardé',
+        autoSaveError: 'Erreur de sauvegarde'
       },
       countrySettings: {
         title: 'Paramètres pays',
@@ -366,7 +369,10 @@ const resources = {
         noSale: 'No sale',
         noSaleDescription: 'Check this box if no sales were made during this event.',
         noSaleCommentRequired: 'A justification comment is required when reporting no sales.',
-        noSaleLabel: 'No sales made'
+        noSaleLabel: 'No sales made',
+        autoSaving: 'Saving...',
+        autoSaved: 'Saved',
+        autoSaveError: 'Save failed'
       },
       countrySettings: {
         title: 'Country settings',
@@ -598,7 +604,10 @@ const resources = {
         noSale: 'Kein Verkauf',
         noSaleDescription: 'Aktivieren Sie dieses Kästchen, wenn bei dieser Veranstaltung keine Verkäufe getätigt wurden.',
         noSaleCommentRequired: 'Ein Begründungskommentar ist erforderlich, wenn kein Verkauf gemeldet wird.',
-        noSaleLabel: 'Keine Verkäufe getätigt'
+        noSaleLabel: 'Keine Verkäufe getätigt',
+        autoSaving: 'Speichern...',
+        autoSaved: 'Gespeichert',
+        autoSaveError: 'Speicherfehler'
       },
       countrySettings: {
         title: 'Ländereinstellungen',
@@ -830,7 +839,10 @@ const resources = {
         noSale: 'Sin ventas',
         noSaleDescription: 'Marque esta casilla si no se realizaron ventas durante esta animación.',
         noSaleCommentRequired: 'Se requiere un comentario de justificación cuando no hay ventas.',
-        noSaleLabel: 'Sin ventas realizadas'
+        noSaleLabel: 'Sin ventas realizadas',
+        autoSaving: 'Guardando...',
+        autoSaved: 'Guardado',
+        autoSaveError: 'Error al guardar'
       },
       countrySettings: {
         title: 'Configuracion de paises',
@@ -1062,7 +1074,10 @@ const resources = {
         noSale: 'Nessuna vendita',
         noSaleDescription: 'Seleziona questa casella se non sono state effettuate vendite durante questo evento.',
         noSaleCommentRequired: 'Un commento di giustificazione è obbligatorio quando non ci sono vendite.',
-        noSaleLabel: 'Nessuna vendita effettuata'
+        noSaleLabel: 'Nessuna vendita effettuata',
+        autoSaving: 'Salvataggio...',
+        autoSaved: 'Salvato',
+        autoSaveError: 'Errore di salvataggio'
       },
       countrySettings: {
         title: 'Impostazioni paesi',

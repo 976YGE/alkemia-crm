@@ -108,12 +108,14 @@ export class SalesService {
   }
 
   static async createSalesReport(input: CreateSalesReportInput): Promise<SalesReport> {
+    const isDraft = input.status === 'draft';
+
     const existingReport = await this.getSalesReportByAppointmentId(input.appointment_id);
     if (existingReport) {
       throw new Error('A sales report already exists for this appointment');
     }
 
-    if (!input.is_no_sale) {
+    if (!isDraft && !input.is_no_sale) {
       if (!input.proofFile) {
         throw new Error('Proof file is required');
       }
@@ -179,6 +181,8 @@ export class SalesService {
   }
 
   static async updateSalesReport(input: UpdateSalesReportInput): Promise<SalesReport> {
+    const isDraft = input.status === 'draft';
+
     const existingReport = await this.getSalesReportById(input.id);
 
     if (!existingReport) {
@@ -189,7 +193,7 @@ export class SalesService {
       throw new Error('Cannot modify an exported sales report');
     }
 
-    if (!input.is_no_sale && !input.proofFile && !input.existingProofFilePath) {
+    if (!isDraft && !input.is_no_sale && !input.proofFile && !input.existingProofFilePath) {
       throw new Error('Proof file is required');
     }
 

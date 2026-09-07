@@ -130,7 +130,11 @@ const resources = {
         uploadProofFile: 'Télécharger une photo ou un PDF',
         changeProofFile: 'Changer le fichier',
         existingProofFile: 'Fichier existant',
-        proofFileHint: 'Formats acceptés : JPG, PNG, PDF (max 10 Mo)'
+        proofFileHint: 'Formats acceptés : JPG, PNG, PDF (max 10 Mo)',
+        noSale: 'Aucune vente',
+        noSaleDescription: 'Cochez cette case si aucune vente n\'a été réalisée lors de cette animation.',
+        noSaleCommentRequired: 'Un commentaire de justification est obligatoire en cas d\'aucune vente.',
+        noSaleLabel: 'Aucune vente réalisée'
       },
       countrySettings: {
         title: 'Paramètres pays',
@@ -358,7 +362,11 @@ const resources = {
         uploadProofFile: 'Upload a photo or PDF',
         changeProofFile: 'Change file',
         existingProofFile: 'Existing file',
-        proofFileHint: 'Accepted formats: JPG, PNG, PDF (max 10 MB)'
+        proofFileHint: 'Accepted formats: JPG, PNG, PDF (max 10 MB)',
+        noSale: 'No sale',
+        noSaleDescription: 'Check this box if no sales were made during this event.',
+        noSaleCommentRequired: 'A justification comment is required when reporting no sales.',
+        noSaleLabel: 'No sales made'
       },
       countrySettings: {
         title: 'Country settings',
@@ -586,7 +594,11 @@ const resources = {
         uploadProofFile: 'Foto oder PDF hochladen',
         changeProofFile: 'Datei ändern',
         existingProofFile: 'Vorhandene Datei',
-        proofFileHint: 'Akzeptierte Formate: JPG, PNG, PDF (max. 10 MB)'
+        proofFileHint: 'Akzeptierte Formate: JPG, PNG, PDF (max. 10 MB)',
+        noSale: 'Kein Verkauf',
+        noSaleDescription: 'Aktivieren Sie dieses Kästchen, wenn bei dieser Veranstaltung keine Verkäufe getätigt wurden.',
+        noSaleCommentRequired: 'Ein Begründungskommentar ist erforderlich, wenn kein Verkauf gemeldet wird.',
+        noSaleLabel: 'Keine Verkäufe getätigt'
       },
       countrySettings: {
         title: 'Ländereinstellungen',
@@ -814,7 +826,11 @@ const resources = {
         uploadProofFile: 'Subir una foto o un PDF',
         changeProofFile: 'Cambiar el archivo',
         existingProofFile: 'Archivo existente',
-        proofFileHint: 'Formatos aceptados: JPG, PNG, PDF (máx 10 MB)'
+        proofFileHint: 'Formatos aceptados: JPG, PNG, PDF (máx 10 MB)',
+        noSale: 'Sin ventas',
+        noSaleDescription: 'Marque esta casilla si no se realizaron ventas durante esta animación.',
+        noSaleCommentRequired: 'Se requiere un comentario de justificación cuando no hay ventas.',
+        noSaleLabel: 'Sin ventas realizadas'
       },
       countrySettings: {
         title: 'Configuracion de paises',
@@ -1042,7 +1058,11 @@ const resources = {
         uploadProofFile: 'Carica una foto o un PDF',
         changeProofFile: 'Cambia il file',
         existingProofFile: 'File esistente',
-        proofFileHint: 'Formati accettati: JPG, PNG, PDF (max 10 MB)'
+        proofFileHint: 'Formati accettati: JPG, PNG, PDF (max 10 MB)',
+        noSale: 'Nessuna vendita',
+        noSaleDescription: 'Seleziona questa casella se non sono state effettuate vendite durante questo evento.',
+        noSaleCommentRequired: 'Un commento di giustificazione è obbligatorio quando non ci sono vendite.',
+        noSaleLabel: 'Nessuna vendita effettuata'
       },
       countrySettings: {
         title: 'Impostazioni paesi',

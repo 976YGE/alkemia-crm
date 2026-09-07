@@ -263,6 +263,7 @@ Deno.serve(async (req: Request) => {
         appointment_id,
         total_amount,
         comment,
+        is_no_sale,
         proof_file_path,
         appointment:appointments!inner(
           external_id,
@@ -314,8 +315,6 @@ Deno.serve(async (req: Request) => {
       : null;
 
     for (const report of reports) {
-      if (!report.lines || report.lines.length === 0) continue;
-
       const userCode = userCodeMap.get(report.appointment?.user_code_id || "") || "";
       const eventId = report.appointment?.external_id || "";
       const comment = (report.comment || "").replace(/;/g, ",").replace(/\n/g, " ");
@@ -325,11 +324,19 @@ Deno.serve(async (req: Request) => {
 
       const csvLines: string[] = [csvHeader];
 
-      for (const line of report.lines) {
-        const productCode = line.product?.code || "";
+      if (report.is_no_sale) {
         csvLines.push(
-          `${line.id};${userCode};${eventId};${productCode};${line.quantity};${(Number(report.total_amount) || 0).toFixed(2)};${comment};${imageFileName}`
+          `;;${eventId};;;annulation;;`
         );
+      } else {
+        if (!report.lines || report.lines.length === 0) continue;
+
+        for (const line of report.lines) {
+          const productCode = line.product?.code || "";
+          csvLines.push(
+            `${line.id};${userCode};${eventId};${productCode};${line.quantity};${(Number(report.total_amount) || 0).toFixed(2)};${comment};${imageFileName}`
+          );
+        }
       }
 
       const csvContent = csvLines.join("\r\n");

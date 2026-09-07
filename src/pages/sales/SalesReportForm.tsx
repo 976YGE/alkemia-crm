@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { ArrowLeft, Save, Check, Search, Plus, Minus, Upload, FileText, X } from 'lucide-react';
+import { ArrowLeft, Save, Check, Search, Plus, Minus, Upload, FileText, X, Ban } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { fr, es, it } from 'date-fns/locale';
 import { MainLayout } from '../../components/layout/MainLayout';
@@ -41,6 +41,7 @@ export function SalesReportForm() {
   const [reportId, setReportId] = useState<string | null>(null);
   const [proofFile, setProofFile] = useState<File | null>(null);
   const [existingProofFilePath, setExistingProofFilePath] = useState<string | null>(null);
+  const [isNoSale, setIsNoSale] = useState(false);
 
   useEffect(() => {
     loadData();
@@ -91,6 +92,7 @@ export function SalesReportForm() {
         setTotalAmount(apt.sales_report.total_amount.toString());
         setComment(apt.sales_report.comment || '');
         setExistingProofFilePath(apt.sales_report.proof_file_path || null);
+        setIsNoSale(apt.sales_report.is_no_sale || false);
 
         const report = await SalesService.getSalesReportById(apt.sales_report.id);
         if (report?.lines) {
@@ -152,36 +154,44 @@ export function SalesReportForm() {
     });
   };
 
+  const handleToggleNoSale = (checked: boolean) => {
+    setIsNoSale(checked);
+    if (checked) {
+      setProductQuantities({});
+      setTotalAmount('0');
+      setProofFile(null);
+    } else {
+      setTotalAmount('');
+    }
+  };
+
   const handleSave = async (status: 'draft' | 'validated') => {
     setError('');
 
-    const totalAmountNum = parseFloat(totalAmount);
-    if (!totalAmount || isNaN(totalAmountNum) || totalAmountNum <= 0) {
-      setError(t('sales.totalAmountRequired'));
-      return;
-    }
+    if (isNoSale) {
+      if (!comment.trim()) {
+        setError(t('sales.noSaleCommentRequired'));
+        return;
+      }
+    } else {
+      const totalAmountNum = parseFloat(totalAmount);
+      if (!totalAmount || isNaN(totalAmountNum) || totalAmountNum <= 0) {
+        setError(t('sales.totalAmountRequired'));
+        return;
+      }
 
-    if (user?.proof_photo_required && !proofFile && !existingProofFilePath) {
-      setError(t('sales.proofFileRequired'));
-      return;
-    }
+      if (user?.proof_photo_required && !proofFile && !existingProofFilePath) {
+        setError(t('sales.proofFileRequired'));
+        return;
+      }
 
-    const lines = Object.entries(productQuantities)
-      .filter(([_, qty]) => qty > 0)
-      .map(([productId, quantity]) => {
-        const product = categories
-          .flatMap(c => c.products)
-          .find(p => p.id === productId);
-        return {
-          product_id: productId,
-          quantity,
-          unit_price: product?.price || 0
-        };
-      });
+      const lines = Object.entries(productQuantities)
+        .filter(([_, qty]) => qty > 0);
 
-    if (lines.length === 0) {
-      setError(t('sales.atLeastOneProduct'));
-      return;
+      if (lines.length === 0) {
+        setError(t('sales.atLeastOneProduct'));
+        return;
+      }
     }
 
     if (status === 'validated') {
@@ -194,6 +204,23 @@ export function SalesReportForm() {
     setSaving(true);
 
     try {
+      const totalAmountNum = isNoSale ? 0 : parseFloat(totalAmount);
+
+      const lines = isNoSale
+        ? []
+        : Object.entries(productQuantities)
+            .filter(([_, qty]) => qty > 0)
+            .map(([productId, quantity]) => {
+              const product = categories
+                .flatMap(c => c.products)
+                .find(p => p.id === productId);
+              return {
+                product_id: productId,
+                quantity,
+                unit_price: product?.price || 0
+              };
+            });
+
       let savedReportId: string | null = null;
 
       if (isEditMode && reportId) {
@@ -205,8 +232,9 @@ export function SalesReportForm() {
           total_amount: totalAmountNum,
           comment: comment || undefined,
           status,
-          proofFile: proofFile || undefined,
-          existingProofFilePath: existingProofFilePath || undefined,
+          is_no_sale: isNoSale,
+          proofFile: isNoSale ? undefined : (proofFile || undefined),
+          existingProofFilePath: isNoSale ? undefined : (existingProofFilePath || undefined),
           lines
         });
         savedReportId = reportId;
@@ -218,7 +246,8 @@ export function SalesReportForm() {
           total_amount: totalAmountNum,
           comment: comment || undefined,
           status,
-          proofFile: proofFile || undefined,
+          is_no_sale: isNoSale,
+          proofFile: isNoSale ? undefined : (proofFile || undefined),
           lines
         });
         savedReportId = created?.id || null;
@@ -303,221 +332,268 @@ export function SalesReportForm() {
           />
         )}
 
+        {/* No Sale Toggle */}
         <Card>
-          <CardHeader>
-            <CardTitle>{t('sales.products')}</CardTitle>
-            <div className="mt-2">
-              <Input
-                type="text"
-                placeholder={t('sales.searchProducts')}
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                icon={<Search className="w-5 h-5 text-slate-400" />}
+          <CardContent className="py-4">
+            <label className="flex items-start gap-4 cursor-pointer group">
+              <div className="relative flex-shrink-0 mt-0.5">
+                <input
+                  type="checkbox"
+                  checked={isNoSale}
+                  onChange={(e) => handleToggleNoSale(e.target.checked)}
+                  className="sr-only peer"
+                />
+                <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-amber-100 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500 transition-colors" />
+              </div>
+              <div className="flex-1">
+                <div className="flex items-center gap-2">
+                  <Ban className="w-4 h-4 text-amber-600" />
+                  <span className="font-semibold text-slate-900">{t('sales.noSale')}</span>
+                </div>
+                <p className="text-sm text-slate-500 mt-1">{t('sales.noSaleDescription')}</p>
+              </div>
+            </label>
+          </CardContent>
+        </Card>
+
+        {isNoSale ? (
+          /* No-sale mode: just the justification comment */
+          <Card>
+            <CardHeader>
+              <CardTitle>
+                {t('sales.comment')} <span className="text-red-500">*</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <textarea
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent resize-none"
+                rows={4}
+                placeholder={t('sales.noSaleCommentRequired')}
+                value={comment}
+                onChange={(e) => setComment(e.target.value)}
               />
-            </div>
-          </CardHeader>
+            </CardContent>
+          </Card>
+        ) : (
+          /* Normal sale mode */
+          <>
+            <Card>
+              <CardHeader>
+                <CardTitle>{t('sales.products')}</CardTitle>
+                <div className="mt-2">
+                  <Input
+                    type="text"
+                    placeholder={t('sales.searchProducts')}
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    icon={<Search className="w-5 h-5 text-slate-400" />}
+                  />
+                </div>
+              </CardHeader>
 
-          <CardContent className="space-y-4">
-            {filteredCategories.map((categoryGroup) => {
-              const isExpanded = expandedCategories.has(categoryGroup.category.id);
-              const categoryTotal = categoryGroup.products.reduce((sum, p) => {
-                const qty = productQuantities[p.id] || 0;
-                return sum + qty;
-              }, 0);
+              <CardContent className="space-y-4">
+                {filteredCategories.map((categoryGroup) => {
+                  const isExpanded = expandedCategories.has(categoryGroup.category.id);
+                  const categoryTotal = categoryGroup.products.reduce((sum, p) => {
+                    const qty = productQuantities[p.id] || 0;
+                    return sum + qty;
+                  }, 0);
 
-              return (
-                <div key={categoryGroup.category.id} className="border border-slate-200 rounded-lg overflow-hidden">
-                  <button
-                    onClick={() => toggleCategory(categoryGroup.category.id)}
-                    className="w-full px-4 py-3 flex items-center justify-between transition-colors"
-                    style={{
-                      background: `linear-gradient(135deg, ${categoryGroup.category.primary_color}15 0%, ${categoryGroup.category.primary_color}05 100%)`,
-                      borderLeft: `4px solid ${categoryGroup.category.primary_color}`
-                    }}
-                  >
-                    <div className="flex items-center">
-                      <div
-                        className="w-3 h-3 rounded-full mr-3"
-                        style={{ backgroundColor: categoryGroup.category.primary_color }}
-                      />
-                      <span className="font-semibold text-slate-900">
-                        {categoryGroup.category.name}
-                      </span>
-                      {categoryTotal > 0 && (
-                        <span className="ml-2 text-sm text-slate-600">
-                          ({categoryTotal})
+                  return (
+                    <div key={categoryGroup.category.id} className="border border-slate-200 rounded-lg overflow-hidden">
+                      <button
+                        onClick={() => toggleCategory(categoryGroup.category.id)}
+                        className="w-full px-4 py-3 flex items-center justify-between transition-colors"
+                        style={{
+                          background: `linear-gradient(135deg, ${categoryGroup.category.primary_color}15 0%, ${categoryGroup.category.primary_color}05 100%)`,
+                          borderLeft: `4px solid ${categoryGroup.category.primary_color}`
+                        }}
+                      >
+                        <div className="flex items-center">
+                          <div
+                            className="w-3 h-3 rounded-full mr-3"
+                            style={{ backgroundColor: categoryGroup.category.primary_color }}
+                          />
+                          <span className="font-semibold text-slate-900">
+                            {categoryGroup.category.name}
+                          </span>
+                          {categoryTotal > 0 && (
+                            <span className="ml-2 text-sm text-slate-600">
+                              ({categoryTotal})
+                            </span>
+                          )}
+                        </div>
+                        <span className={`transform transition-transform ${isExpanded ? 'rotate-180' : ''}`}>
+                          ▼
                         </span>
-                      )}
-                    </div>
-                    <span className={`transform transition-transform ${isExpanded ? 'rotate-180' : ''}`}>
-                      ▼
-                    </span>
-                  </button>
+                      </button>
 
-                  {isExpanded && (
-                    <div className="divide-y divide-gray-100">
-                      {categoryGroup.products.map((product) => {
-                        const quantity = productQuantities[product.id] || 0;
-                        return (
-                          <div key={product.id} className="px-4 py-3 hover:bg-slate-50 transition-colors">
-                            <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-3">
-                              <div className="flex-1 min-w-0">
-                                <p className="font-medium text-slate-900 break-words leading-snug">{product.name}</p>
-                                <div className="mt-1 space-y-0.5">
-                                  <p className="text-sm text-slate-600">
-                                    {product.price.toFixed(2)} {user?.country_code === 'CH' ? 'CHF' : '€'}
-                                  </p>
-                                  <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-xs text-slate-500">
-                                    <span className="font-mono">SKU: {product.code}</span>
-                                    {product.ean && (
-                                      <span className="font-mono">EAN: {product.ean}</span>
-                                    )}
+                      {isExpanded && (
+                        <div className="divide-y divide-gray-100">
+                          {categoryGroup.products.map((product) => {
+                            const quantity = productQuantities[product.id] || 0;
+                            return (
+                              <div key={product.id} className="px-4 py-3 hover:bg-slate-50 transition-colors">
+                                <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-3">
+                                  <div className="flex-1 min-w-0">
+                                    <p className="font-medium text-slate-900 break-words leading-snug">{product.name}</p>
+                                    <div className="mt-1 space-y-0.5">
+                                      <p className="text-sm text-slate-600">
+                                        {product.price.toFixed(2)} {user?.country_code === 'CH' ? 'CHF' : '€'}
+                                      </p>
+                                      <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-xs text-slate-500">
+                                        <span className="font-mono">SKU: {product.code}</span>
+                                        {product.ean && (
+                                          <span className="font-mono">EAN: {product.ean}</span>
+                                        )}
+                                      </div>
+                                    </div>
+                                  </div>
+                                  <div className="flex justify-end md:justify-start md:flex-shrink-0">
+                                    <div className="flex items-center gap-2">
+                                      <button
+                                        onClick={() => updateQuantity(product.id, -1)}
+                                        disabled={quantity === 0}
+                                        className="w-8 h-8 flex items-center justify-center rounded-lg bg-slate-100 hover:bg-slate-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                      >
+                                        <Minus className="w-4 h-4" />
+                                      </button>
+                                      <input
+                                        type="number"
+                                        min="0"
+                                        value={quantity || ''}
+                                        onChange={(e) => {
+                                          const val = parseInt(e.target.value) || 0;
+                                          setQuantity(product.id, val);
+                                        }}
+                                        className="w-14 text-center px-1 py-1 border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent text-sm"
+                                      />
+                                      <button
+                                        onClick={() => updateQuantity(product.id, 1)}
+                                        className="w-8 h-8 flex items-center justify-center rounded-lg transition-colors"
+                                        style={{
+                                          backgroundColor: `${categoryGroup.category.primary_color}20`,
+                                        }}
+                                      >
+                                        <Plus className="w-4 h-4" />
+                                      </button>
+                                    </div>
                                   </div>
                                 </div>
                               </div>
-                              <div className="flex justify-end md:justify-start md:flex-shrink-0">
-                                <div className="flex items-center gap-2">
-                                  <button
-                                    onClick={() => updateQuantity(product.id, -1)}
-                                    disabled={quantity === 0}
-                                    className="w-8 h-8 flex items-center justify-center rounded-lg bg-slate-100 hover:bg-slate-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                                  >
-                                    <Minus className="w-4 h-4" />
-                                  </button>
-                                  <input
-                                    type="number"
-                                    min="0"
-                                    value={quantity || ''}
-                                    onChange={(e) => {
-                                      const val = parseInt(e.target.value) || 0;
-                                      setQuantity(product.id, val);
-                                    }}
-                                    className="w-14 text-center px-1 py-1 border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent text-sm"
-                                  />
-                                  <button
-                                    onClick={() => updateQuantity(product.id, 1)}
-                                    className="w-8 h-8 flex items-center justify-center rounded-lg transition-colors"
-                                    style={{
-                                      backgroundColor: `${categoryGroup.category.primary_color}20`,
-                                    }}
-                                  >
-                                    <Plus className="w-4 h-4" />
-                                  </button>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        );
-                      })}
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>{t('sales.totalAmount')}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  <div className="bg-brand-50 border border-brand-200 rounded-lg p-3">
+                    <p className="text-sm font-medium text-brand-900 mb-1">CA Calculé</p>
+                    <p className="text-2xl font-bold text-brand-600">
+                      {calculatedAmount.toFixed(2)} {user?.country_code === 'CH' ? 'CHF' : '€'}
+                    </p>
+                    <p className="text-sm text-brand-700 mt-1">{totalQuantity} article{totalQuantity > 1 ? 's' : ''}</p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">
+                      CA Global
+                    </label>
+                    <Input
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      placeholder="0.00"
+                      value={totalAmount}
+                      onChange={(e) => setTotalAmount(e.target.value)}
+                      className="text-lg font-semibold"
+                    />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>{t('sales.comment')}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <textarea
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent resize-none"
+                  rows={3}
+                  placeholder={t('sales.commentPlaceholder')}
+                  value={comment}
+                  onChange={(e) => setComment(e.target.value)}
+                />
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>
+                  {t('sales.proofFile')} {user?.proof_photo_required && <span className="text-red-500">*</span>}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {(proofFile || existingProofFilePath) && (
+                    <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg border border-slate-200">
+                      <div className="flex items-center gap-2">
+                        <FileText className="w-5 h-5 text-slate-600" />
+                        <span className="text-sm text-slate-900">
+                          {proofFile ? proofFile.name : t('sales.existingProofFile')}
+                        </span>
+                      </div>
+                      <button
+                        onClick={() => {
+                          setProofFile(null);
+                          if (!isEditMode) {
+                            setExistingProofFilePath(null);
+                          }
+                        }}
+                        className="p-1 hover:bg-slate-200 rounded transition-colors"
+                      >
+                        <X className="w-4 h-4 text-slate-600" />
+                      </button>
                     </div>
                   )}
+                  <label className="block">
+                    <input
+                      type="file"
+                      accept="image/*,application/pdf"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          setProofFile(file);
+                        }
+                      }}
+                      className="hidden"
+                      id="proof-file-input"
+                    />
+                    <div className="flex items-center justify-center gap-2 px-4 py-3 border-2 border-dashed border-slate-300 rounded-lg hover:border-brand-500 hover:bg-brand-50 transition-colors cursor-pointer">
+                      <Upload className="w-5 h-5 text-slate-600" />
+                      <span className="text-sm text-slate-600">
+                        {proofFile || existingProofFilePath ? t('sales.changeProofFile') : t('sales.uploadProofFile')}
+                      </span>
+                    </div>
+                  </label>
+                  <p className="text-xs text-slate-500">
+                    {t('sales.proofFileHint')}
+                  </p>
                 </div>
-              );
-            })}
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>{t('sales.totalAmount')}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              <div className="bg-brand-50 border border-brand-200 rounded-lg p-3">
-                <p className="text-sm font-medium text-brand-900 mb-1">CA Calculé</p>
-                <p className="text-2xl font-bold text-brand-600">
-                  {calculatedAmount.toFixed(2)} {user?.country_code === 'CH' ? 'CHF' : '€'}
-                </p>
-                <p className="text-sm text-brand-700 mt-1">{totalQuantity} article{totalQuantity > 1 ? 's' : ''}</p>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">
-                  CA Global
-                </label>
-                <Input
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  placeholder="0.00"
-                  value={totalAmount}
-                  onChange={(e) => setTotalAmount(e.target.value)}
-                  className="text-lg font-semibold"
-                />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>{t('sales.comment')}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <textarea
-              className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent resize-none"
-              rows={3}
-              placeholder={t('sales.commentPlaceholder')}
-              value={comment}
-              onChange={(e) => setComment(e.target.value)}
-            />
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>
-              {t('sales.proofFile')} {user?.proof_photo_required && <span className="text-red-500">*</span>}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {(proofFile || existingProofFilePath) && (
-                <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg border border-slate-200">
-                  <div className="flex items-center gap-2">
-                    <FileText className="w-5 h-5 text-slate-600" />
-                    <span className="text-sm text-slate-900">
-                      {proofFile ? proofFile.name : t('sales.existingProofFile')}
-                    </span>
-                  </div>
-                  <button
-                    onClick={() => {
-                      setProofFile(null);
-                      if (!isEditMode) {
-                        setExistingProofFilePath(null);
-                      }
-                    }}
-                    className="p-1 hover:bg-slate-200 rounded transition-colors"
-                  >
-                    <X className="w-4 h-4 text-slate-600" />
-                  </button>
-                </div>
-              )}
-              <label className="block">
-                <input
-                  type="file"
-                  accept="image/*,application/pdf"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) {
-                      setProofFile(file);
-                    }
-                  }}
-                  className="hidden"
-                  id="proof-file-input"
-                />
-                <div className="flex items-center justify-center gap-2 px-4 py-3 border-2 border-dashed border-slate-300 rounded-lg hover:border-brand-500 hover:bg-brand-50 transition-colors cursor-pointer">
-                  <Upload className="w-5 h-5 text-slate-600" />
-                  <span className="text-sm text-slate-600">
-                    {proofFile || existingProofFilePath ? t('sales.changeProofFile') : t('sales.uploadProofFile')}
-                  </span>
-                </div>
-              </label>
-              <p className="text-xs text-slate-500">
-                {t('sales.proofFileHint')}
-              </p>
-            </div>
-          </CardContent>
-        </Card>
+              </CardContent>
+            </Card>
+          </>
+        )}
 
         <div className="bg-white border-t border-slate-200 p-4 -mx-4 sm:mx-0 sm:border-0 sm:p-0 mt-8">
           <div className="flex gap-3">

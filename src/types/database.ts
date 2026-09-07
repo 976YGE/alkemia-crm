@@ -109,6 +109,7 @@ export interface SalesReport {
   total_amount: number;
   comment: string | null;
   proof_file_path: string | null;
+  is_no_sale: boolean;
   status: SalesReportStatus;
   exported: boolean;
   exported_at: string | null;

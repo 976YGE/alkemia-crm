@@ -207,7 +207,80 @@ Deno.serve(async (req: Request) => {
     const appUrl = Deno.env.get("APP_URL") || "https://alkemia.patyka.com";
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    const { type, registrationId, documentId } = await req.json();
+    const { type, registrationId, documentId, revisionToken } = await req.json();
+
+    // Authorization: staff-only notification types require an HR/admin session
+    // (or the service role). The two public flows are bound to the record they
+    // concern: a brand new registration, or a revision proven by its token.
+    // Deny by default: every type except the two public flows requires staff.
+    const publicTypes = ["registration_submitted", "revision_resubmitted"];
+    const anonKey = Deno.env.get("SUPABASE_ANON_KEY") ?? "";
+    const callerToken = (req.headers.get("Authorization") ?? "")
+      .replace(/^Bearer\s+/i, "")
+      .trim();
+
+    const isServiceRole = !!callerToken && callerToken === supabaseServiceKey;
+    let callerRole: string | null = null;
+
+    if (!isServiceRole && callerToken && callerToken !== anonKey) {
+      const userClient = createClient(supabaseUrl, anonKey, {
+        global: { headers: { Authorization: `Bearer ${callerToken}` } },
+      });
+      const { data: { user } } = await userClient.auth.getUser();
+      if (user) {
+        const { data: profile } = await supabase
+          .from("users")
+          .select("role")
+          .eq("id", user.id)
+          .maybeSingle();
+        callerRole = (profile?.role as string) ?? null;
+      }
+    }
+
+    const isStaff =
+      isServiceRole ||
+      (!!callerRole && ["hr_manager", "admin", "super_admin"].includes(callerRole));
+
+    if (!publicTypes.includes(type) && !isStaff) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    if (!isStaff && (type === "registration_submitted" || type === "revision_resubmitted")) {
+      const { data: target } = await supabase
+        .from("freelance_registrations")
+        .select("id, created_at, revision_token")
+        .eq("id", registrationId)
+        .maybeSingle();
+
+      if (!target) {
+        return new Response(JSON.stringify({ error: "Unauthorized" }), {
+          status: 401,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      if (type === "registration_submitted") {
+        const ageMs = Date.now() - new Date(target.created_at as string).getTime();
+        if (ageMs > 15 * 60 * 1000) {
+          return new Response(JSON.stringify({ error: "Unauthorized" }), {
+            status: 401,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+      } else if (
+        !revisionToken ||
+        !target.revision_token ||
+        revisionToken !== target.revision_token
+      ) {
+        return new Response(JSON.stringify({ error: "Unauthorized" }), {
+          status: 401,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+    }
 
     switch (type) {
       case "registration_submitted": {

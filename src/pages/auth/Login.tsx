@@ -34,7 +34,8 @@ export function Login() {
 
       navigate('/agenda');
     } catch (err) {
-      setError(err instanceof Error ? err.message : t('common.error'));
+      console.error('Sign-in failed', err);
+      setError(t('common.error'));
       setLoading(false);
     }
   };

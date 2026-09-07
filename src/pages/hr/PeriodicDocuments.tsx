@@ -9,6 +9,7 @@ import { EmptyState } from '../../components/ui/EmptyState';
 import { Toast } from '../../components/ui/Toast';
 import { useAuth } from '../../contexts/AuthContext';
 import { FreelanceService } from '../../services/freelance.service';
+import { supabase } from '../../lib/supabase';
 import type { FreelancePeriodicDocument } from '../../types/database';
 
 const DOCUMENT_LABELS: Record<string, string> = {
@@ -54,10 +55,13 @@ export function PeriodicDocuments() {
   const handleSendReminder = async (doc: DocWithRegistration) => {
     try {
       const apiUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-freelance-notification`;
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error('No session');
       const response = await fetch(apiUrl, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+          'Authorization': `Bearer ${session.access_token}`,
+          'Apikey': import.meta.env.VITE_SUPABASE_ANON_KEY,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ type: 'periodic_document_reminder', documentId: doc.id }),

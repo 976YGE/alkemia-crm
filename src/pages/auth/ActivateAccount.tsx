@@ -51,7 +51,8 @@ export function ActivateAccount() {
         const countries = await AuthService.getAvailableCountries();
         setAvailableCountries(countries);
       } catch (err) {
-        setError(err instanceof Error ? err.message : t('common.error'));
+        console.error('Error loading countries:', err);
+        setError(t('common.error'));
       }
     };
 
@@ -91,7 +92,8 @@ export function ActivateAccount() {
       } else if (err instanceof Error && err.message === 'CODE_INACTIVE') {
         setError(t('auth.codeInactive'));
       } else {
-        setError(err instanceof Error ? err.message : t('common.error'));
+        console.error('Error verifying code:', err);
+        setError(t('common.error'));
       }
     } finally {
       setLoading(false);
@@ -125,17 +127,18 @@ export function ActivateAccount() {
     setLoading(true);
 
     try {
-      const { error: activationError } = await activateAccount(userCodeId, email, password);
+      const { error: activationError } = await activateAccount(userCodeId, email, password, selectedCountry);
 
       if (activationError) {
-        setError(activationError);
+        setError(t('common.error'));
         setLoading(false);
         return;
       }
 
       navigate('/agenda');
     } catch (err) {
-      setError(err instanceof Error ? err.message : t('common.error'));
+      console.error('Error creating account:', err);
+      setError(t('common.error'));
       setLoading(false);
     }
   };

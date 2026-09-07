@@ -1,2 +1,41 @@
 [functions.export-sales]
 verify_jwt = true
+
+[functions.test-sftp]
+verify_jwt = true
+
+[functions.sftp-import]
+verify_jwt = true
+
+[functions.sftp-export]
+verify_jwt = true
+
+[functions.process-imports]
+verify_jwt = true
+
+[functions.reset-user-password]
+verify_jwt = true
+
+[functions.send-notification]
+verify_jwt = true
+
+[functions.trigger-daily-notifications]
+verify_jwt = true
+
+[functions.get-outbound-ip]
+verify_jwt = true
+
+[functions.scheduled-sftp-sync]
+verify_jwt = true
+
+[functions.sftp-schedule-alert]
+verify_jwt = true
+
+[functions.send-freelance-notification]
+verify_jwt = true
+
+[functions.check-periodic-documents]
+verify_jwt = true
+
+[functions.create-user]
+verify_jwt = true

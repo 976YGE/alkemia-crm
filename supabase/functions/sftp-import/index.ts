@@ -54,6 +54,26 @@ Deno.serve(async (req: Request) => {
       throw new Error("Unauthorized");
     }
 
+    const adminClient = createClient(
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
+    );
+    const { data: callerProfile } = await adminClient
+      .from("users")
+      .select("role")
+      .eq("id", user.id)
+      .maybeSingle();
+
+    if (!callerProfile || !["admin", "super_admin"].includes(callerProfile.role as string)) {
+      return new Response(
+        JSON.stringify({ success: false, message: "Forbidden" }),
+        {
+          status: 403,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
+    }
+
     let serverIp: string | null = null;
     try {
       const ipRes = await fetch("https://api.ipify.org?format=json");

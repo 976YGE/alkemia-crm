@@ -121,16 +121,36 @@ export class FreelanceService {
     return { id: registrationId };
   }
 
+  private static async sendNotification(
+    payload: Record<string, unknown>,
+    options?: { requireSession?: boolean }
+  ): Promise<void> {
+    const apiUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-freelance-notification`;
+    const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
+    let bearer = anonKey;
+
+    if (options?.requireSession) {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+      bearer = session.access_token;
+    }
+
+    await fetch(apiUrl, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${bearer}`,
+        'Apikey': anonKey,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    });
+  }
+
   private static async notifyRegistration(registrationId: string): Promise<void> {
     try {
-      const apiUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-freelance-notification`;
-      await fetch(apiUrl, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ type: 'registration_submitted', registrationId }),
+      await FreelanceService.sendNotification({
+        type: 'registration_submitted',
+        registrationId,
       });
     } catch {
       // Non-blocking: notification failure shouldn't block the registration
@@ -226,15 +246,10 @@ export class FreelanceService {
     if (updateError) throw updateError;
 
     try {
-      const apiUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-freelance-notification`;
-      await fetch(apiUrl, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ type: 'registration_approved', registrationId: id }),
-      });
+      await FreelanceService.sendNotification(
+        { type: 'registration_approved', registrationId: id },
+        { requireSession: true }
+      );
     } catch {
       // Non-blocking
     }
@@ -255,15 +270,10 @@ export class FreelanceService {
     if (error) throw error;
 
     try {
-      const apiUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-freelance-notification`;
-      await fetch(apiUrl, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ type: 'registration_rejected', registrationId: id }),
-      });
+      await FreelanceService.sendNotification(
+        { type: 'registration_rejected', registrationId: id },
+        { requireSession: true }
+      );
     } catch {
       // Non-blocking
     }
@@ -394,15 +404,10 @@ export class FreelanceService {
     if (error) throw error;
 
     try {
-      const apiUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-freelance-notification`;
-      await fetch(apiUrl, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ type: 'revision_requested', registrationId }),
-      });
+      await FreelanceService.sendNotification(
+        { type: 'revision_requested', registrationId },
+        { requireSession: true }
+      );
     } catch {
       // Non-blocking
     }
@@ -535,6 +540,16 @@ export class FreelanceService {
       throw new Error('Lien invalide ou expiré');
     }
 
+    try {
+      await FreelanceService.sendNotification({
+        type: 'revision_resubmitted',
+        registrationId,
+        revisionToken: token,
+      });
+    } catch {
+      // Non-blocking
+    }
+
     const { error } = await supabase
       .from('freelance_registrations')
       .update({
@@ -546,19 +561,5 @@ export class FreelanceService {
       .eq('id', registrationId);
 
     if (error) throw error;
-
-    try {
-      const apiUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-freelance-notification`;
-      await fetch(apiUrl, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ type: 'revision_resubmitted', registrationId }),
-      });
-    } catch {
-      // Non-blocking
-    }
   }
 }

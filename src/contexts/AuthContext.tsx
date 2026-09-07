@@ -7,7 +7,7 @@ interface AuthContextType {
   loading: boolean;
   signIn: (email: string, password: string) => Promise<{ error: string | null }>;
   signOut: () => Promise<void>;
-  activateAccount: (userCodeId: string, email: string, password: string) => Promise<{ error: string | null }>;
+  activateAccount: (userCodeId: string, email: string, password: string, countryCode: string) => Promise<{ error: string | null }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -45,8 +45,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null);
   };
 
-  const activateAccount = async (userCodeId: string, email: string, password: string) => {
-    const { user, error } = await AuthService.activateAccount(userCodeId, email, password);
+  const activateAccount = async (userCodeId: string, email: string, password: string, countryCode: string) => {
+    const { user, error } = await AuthService.activateAccount(userCodeId, email, password, countryCode);
     if (user) setUser(user);
     return { error };
   };

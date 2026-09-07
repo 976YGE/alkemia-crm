@@ -39,14 +39,14 @@ export class AuthService {
   }
 
   static async verifyUserCode(code: string, countryCode: string): Promise<UserCode | null> {
-    const { data: existingCode, error } = await supabase
-      .from('user_codes')
-      .select('*')
-      .eq('code', code)
-      .eq('country_code', countryCode)
-      .maybeSingle();
+    const { data, error } = await supabase.rpc('lookup_activation_code', {
+      p_code: code,
+      p_country_code: countryCode
+    });
 
     if (error) throw error;
+
+    const existingCode = (Array.isArray(data) ? data[0] : data) as UserCode | undefined;
 
     if (!existingCode) {
       return null;
@@ -66,7 +66,8 @@ export class AuthService {
   static async activateAccount(
     userCodeId: string,
     email: string,
-    password: string
+    password: string,
+    countryCode: string
   ): Promise<{ user: AuthUser; error: string | null }> {
     try {
       const { data: authData, error: authError } = await supabase.auth.signUp({
@@ -82,35 +83,22 @@ export class AuthService {
         return { user: null as unknown as AuthUser, error: 'User creation failed' };
       }
 
-      const { data: userCodeData } = await supabase
-        .from('user_codes')
-        .select('*')
-        .eq('id', userCodeId)
-        .single();
-
-      if (!userCodeData) {
-        return { user: null as unknown as AuthUser, error: 'User code not found' };
-      }
-
       const { error: userError } = await supabase.from('users').insert({
         id: authData.user.id,
         user_code_id: userCodeId,
         email,
-        country_code: userCodeData.country_code,
+        country_code: countryCode,
         preferred_language: i18n.language || 'fr'
       });
 
       if (userError) {
-        return { user: null as unknown as AuthUser, error: userError.message };
+        console.error('Error creating user profile:', userError);
+        return { user: null as unknown as AuthUser, error: 'ACTIVATION_FAILED' };
       }
 
-      const { error: activateError } = await supabase
-        .from('user_codes')
-        .update({
-          is_activated: true,
-          activated_at: new Date().toISOString()
-        })
-        .eq('id', userCodeId);
+      const { error: activateError } = await supabase.rpc('activate_own_user_code', {
+        p_user_code_id: userCodeId
+      });
 
       if (activateError) {
         console.error('Error activating user code:', activateError);

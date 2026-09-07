@@ -16,12 +16,47 @@ interface ProcessRequest {
   filename: string;
 }
 
+async function isAdminCaller(req: Request): Promise<boolean> {
+  const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
+  const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
+  const anonKey = Deno.env.get("SUPABASE_ANON_KEY") ?? "";
+  const token = (req.headers.get("Authorization") ?? "").replace(/^Bearer\s+/i, "").trim();
+
+  if (!token || token === anonKey) return false;
+  if (serviceKey && token === serviceKey) return true;
+
+  const userClient = createClient(supabaseUrl, anonKey, {
+    global: { headers: { Authorization: `Bearer ${token}` } },
+  });
+  const { data: { user } } = await userClient.auth.getUser();
+  if (!user) return false;
+
+  const admin = createClient(supabaseUrl, serviceKey);
+  const { data: profile } = await admin
+    .from("users")
+    .select("role")
+    .eq("id", user.id)
+    .maybeSingle();
+
+  return !!profile && ["admin", "super_admin"].includes(profile.role as string);
+}
+
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
     return new Response(null, {
       status: 200,
       headers: corsHeaders,
     });
+  }
+
+  if (!(await isAdminCaller(req))) {
+    return new Response(
+      JSON.stringify({ success: false, message: "Unauthorized" }),
+      {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      }
+    );
   }
 
   try {

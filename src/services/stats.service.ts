@@ -239,7 +239,7 @@ export class StatsService {
     const { data, error } = await supabase
       .from('countries')
       .select('code, name')
-      .eq('is_active', true)
+      .eq('active', true)
       .order('name');
 
     if (error) throw error;

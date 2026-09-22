@@ -345,6 +345,7 @@ export function SalesReportForm() {
           comment: comment || undefined,
           status,
           is_no_sale: isNoSale,
+          proof_photo_required: user!.proof_photo_required,
           proofFile: isNoSale ? undefined : (proofFile || undefined),
           existingProofFilePath: isNoSale ? undefined : (existingProofFilePath || undefined),
           lines
@@ -359,6 +360,7 @@ export function SalesReportForm() {
           comment: comment || undefined,
           status,
           is_no_sale: isNoSale,
+          proof_photo_required: user!.proof_photo_required,
           proofFile: isNoSale ? undefined : (proofFile || undefined),
           lines
         });

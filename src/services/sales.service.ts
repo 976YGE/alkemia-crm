@@ -9,6 +9,7 @@ export interface CreateSalesReportInput {
   comment?: string;
   status: 'draft' | 'validated';
   is_no_sale?: boolean;
+  proof_photo_required?: boolean;
   proofFile?: File;
   lines: Array<{
     product_id: string;
@@ -116,7 +117,7 @@ export class SalesService {
     }
 
     if (!isDraft && !input.is_no_sale) {
-      if (!input.proofFile) {
+      if (input.proof_photo_required && !input.proofFile) {
         throw new Error('Proof file is required');
       }
 
@@ -193,7 +194,7 @@ export class SalesService {
       throw new Error('Cannot modify an exported sales report');
     }
 
-    if (!isDraft && !input.is_no_sale && !input.proofFile && !input.existingProofFilePath) {
+    if (!isDraft && !input.is_no_sale && input.proof_photo_required && !input.proofFile && !input.existingProofFilePath) {
       throw new Error('Proof file is required');
     }
 

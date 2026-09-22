@@ -32,6 +32,7 @@ import { FreelanceRevision } from './pages/freelance/FreelanceRevision';
 import { FreelanceRegistrations } from './pages/hr/FreelanceRegistrations';
 import { FreelanceRegistrationDetail } from './pages/hr/FreelanceRegistrationDetail';
 import { PeriodicDocuments } from './pages/hr/PeriodicDocuments';
+import { AnimationStats } from './pages/stats/AnimationStats';
 import { CookieBanner } from './components/ui/CookieBanner';
 import { useAuth } from './contexts/AuthContext';
 
@@ -55,6 +56,7 @@ function AppRoutes() {
         <Route path="/sales/edit/:appointmentId" element={<ProtectedRoute><SalesReportForm /></ProtectedRoute>} />
         <Route path="/sales/:id" element={<ProtectedRoute><SalesReportView /></ProtectedRoute>} />
         <Route path="/clients" element={<ProtectedRoute><ClientsList /></ProtectedRoute>} />
+        <Route path="/stats" element={<ProtectedRoute><AnimationStats /></ProtectedRoute>} />
         <Route path="/clients/new" element={<ProtectedRoute><CustomerForm /></ProtectedRoute>} />
         <Route path="/clients/:id" element={<ProtectedRoute><CustomerDetail /></ProtectedRoute>} />
         <Route path="/admin/sftp" element={<ProtectedRoute><SFTPConfiguration /></ProtectedRoute>} />

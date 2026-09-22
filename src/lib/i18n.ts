@@ -234,6 +234,36 @@ const resources = {
         disabled: 'Désactivé',
         navLabel: 'Notifications',
         adminNavLabel: 'Notifications admin'
+      },
+      stats: {
+        title: 'Statistiques',
+        subtitle: 'Résultats d\'animation par période',
+        year: 'Année',
+        compareWith: 'Comparer avec',
+        noComparison: 'Pas de comparaison',
+        country: 'Pays',
+        allCountries: 'Tous les pays',
+        animator: 'Animateur',
+        allAnimators: 'Tous les animateurs',
+        totalRevenue: 'CA total',
+        totalAnimations: 'Animations',
+        avgRevenue: 'CA moyen / animation',
+        lastQuarterAvg: 'CA moyen (3 derniers mois)',
+        noSaleRate: 'Taux sans vente',
+        monthlyRevenue: 'Évolution mensuelle du chiffre d\'affaires',
+        monthlyDetail: 'Détail mensuel',
+        animatorRanking: 'Classement des animateurs',
+        month: 'Mois',
+        animationsCount: 'Animations',
+        ca: 'CA',
+        avgCa: 'CA moyen',
+        noSales: 'Sans vente',
+        total: 'Total',
+        animatorName: 'Animateur',
+        months: {
+          jan: 'Jan', feb: 'Fév', mar: 'Mar', apr: 'Avr', may: 'Mai', jun: 'Jun',
+          jul: 'Jul', aug: 'Aoû', sep: 'Sep', oct: 'Oct', nov: 'Nov', dec: 'Déc'
+        }
       }
     }
   },
@@ -469,6 +499,36 @@ const resources = {
         disabled: 'Disabled',
         navLabel: 'Notifications',
         adminNavLabel: 'Admin notifications'
+      },
+      stats: {
+        title: 'Statistics',
+        subtitle: 'Animation results by period',
+        year: 'Year',
+        compareWith: 'Compare with',
+        noComparison: 'No comparison',
+        country: 'Country',
+        allCountries: 'All countries',
+        animator: 'Animator',
+        allAnimators: 'All animators',
+        totalRevenue: 'Total revenue',
+        totalAnimations: 'Animations',
+        avgRevenue: 'Avg revenue / animation',
+        lastQuarterAvg: 'Avg revenue (last 3 months)',
+        noSaleRate: 'No-sale rate',
+        monthlyRevenue: 'Monthly revenue evolution',
+        monthlyDetail: 'Monthly detail',
+        animatorRanking: 'Animator ranking',
+        month: 'Month',
+        animationsCount: 'Animations',
+        ca: 'Revenue',
+        avgCa: 'Avg revenue',
+        noSales: 'No sale',
+        total: 'Total',
+        animatorName: 'Animator',
+        months: {
+          jan: 'Jan', feb: 'Feb', mar: 'Mar', apr: 'Apr', may: 'May', jun: 'Jun',
+          jul: 'Jul', aug: 'Aug', sep: 'Sep', oct: 'Oct', nov: 'Nov', dec: 'Dec'
+        }
       }
     }
   },
@@ -704,6 +764,36 @@ const resources = {
         disabled: 'Deaktiviert',
         navLabel: 'Benachrichtigungen',
         adminNavLabel: 'Admin-Benachrichtigungen'
+      },
+      stats: {
+        title: 'Statistiken',
+        subtitle: 'Animationsergebnisse nach Zeitraum',
+        year: 'Jahr',
+        compareWith: 'Vergleichen mit',
+        noComparison: 'Kein Vergleich',
+        country: 'Land',
+        allCountries: 'Alle Länder',
+        animator: 'Animator',
+        allAnimators: 'Alle Animatoren',
+        totalRevenue: 'Gesamtumsatz',
+        totalAnimations: 'Animationen',
+        avgRevenue: 'Durchschn. Umsatz / Animation',
+        lastQuarterAvg: 'Durchschn. Umsatz (letzte 3 Monate)',
+        noSaleRate: 'Ohne-Verkauf-Rate',
+        monthlyRevenue: 'Monatliche Umsatzentwicklung',
+        monthlyDetail: 'Monatsübersicht',
+        animatorRanking: 'Animator-Ranking',
+        month: 'Monat',
+        animationsCount: 'Animationen',
+        ca: 'Umsatz',
+        avgCa: 'Durchschn. Umsatz',
+        noSales: 'Ohne Verkauf',
+        total: 'Gesamt',
+        animatorName: 'Animator',
+        months: {
+          jan: 'Jan', feb: 'Feb', mar: 'Mär', apr: 'Apr', may: 'Mai', jun: 'Jun',
+          jul: 'Jul', aug: 'Aug', sep: 'Sep', oct: 'Okt', nov: 'Nov', dec: 'Dez'
+        }
       }
     }
   },
@@ -939,6 +1029,36 @@ const resources = {
         disabled: 'Desactivado',
         navLabel: 'Notificaciones',
         adminNavLabel: 'Notificaciones admin'
+      },
+      stats: {
+        title: 'Estadísticas',
+        subtitle: 'Resultados de animación por período',
+        year: 'Año',
+        compareWith: 'Comparar con',
+        noComparison: 'Sin comparación',
+        country: 'País',
+        allCountries: 'Todos los países',
+        animator: 'Animador',
+        allAnimators: 'Todos los animadores',
+        totalRevenue: 'Ingreso total',
+        totalAnimations: 'Animaciones',
+        avgRevenue: 'Ingreso medio / animación',
+        lastQuarterAvg: 'Ingreso medio (últimos 3 meses)',
+        noSaleRate: 'Tasa sin venta',
+        monthlyRevenue: 'Evolución mensual de ingresos',
+        monthlyDetail: 'Detalle mensual',
+        animatorRanking: 'Clasificación de animadores',
+        month: 'Mes',
+        animationsCount: 'Animaciones',
+        ca: 'Ingreso',
+        avgCa: 'Ingreso medio',
+        noSales: 'Sin venta',
+        total: 'Total',
+        animatorName: 'Animador',
+        months: {
+          jan: 'Ene', feb: 'Feb', mar: 'Mar', apr: 'Abr', may: 'May', jun: 'Jun',
+          jul: 'Jul', aug: 'Ago', sep: 'Sep', oct: 'Oct', nov: 'Nov', dec: 'Dic'
+        }
       }
     }
   },
@@ -1174,6 +1294,36 @@ const resources = {
         disabled: 'Disattivato',
         navLabel: 'Notifiche',
         adminNavLabel: 'Notifiche admin'
+      },
+      stats: {
+        title: 'Statistiche',
+        subtitle: 'Risultati delle animazioni per periodo',
+        year: 'Anno',
+        compareWith: 'Confronta con',
+        noComparison: 'Nessun confronto',
+        country: 'Paese',
+        allCountries: 'Tutti i paesi',
+        animator: 'Animatore',
+        allAnimators: 'Tutti gli animatori',
+        totalRevenue: 'Fatturato totale',
+        totalAnimations: 'Animazioni',
+        avgRevenue: 'Fatturato medio / animazione',
+        lastQuarterAvg: 'Fatturato medio (ultimi 3 mesi)',
+        noSaleRate: 'Tasso senza vendita',
+        monthlyRevenue: 'Evoluzione mensile del fatturato',
+        monthlyDetail: 'Dettaglio mensile',
+        animatorRanking: 'Classifica animatori',
+        month: 'Mese',
+        animationsCount: 'Animazioni',
+        ca: 'Fatturato',
+        avgCa: 'Fatturato medio',
+        noSales: 'Senza vendita',
+        total: 'Totale',
+        animatorName: 'Animatore',
+        months: {
+          jan: 'Gen', feb: 'Feb', mar: 'Mar', apr: 'Apr', may: 'Mag', jun: 'Giu',
+          jul: 'Lug', aug: 'Ago', sep: 'Set', oct: 'Ott', nov: 'Nov', dec: 'Dic'
+        }
       }
     }
   }
